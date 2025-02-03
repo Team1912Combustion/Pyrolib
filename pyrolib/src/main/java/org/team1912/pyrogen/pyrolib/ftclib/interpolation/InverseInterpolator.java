@@ -6,6 +6,8 @@ package org.team1912.pyrogen.pyrolib.ftclib.interpolation;
 
 //import org.firstinspires.ftc.teamcode.pyrolib.interpolation.ftclib.MathUtil;
 
+import org.team1912.pyrogen.pyrolib.ftclib.util.MathUtil;
+
 /**
  * An inverse interpolation function which determines where within an interpolation range an object
  * lies. This behavior can be linear or nonlinear.

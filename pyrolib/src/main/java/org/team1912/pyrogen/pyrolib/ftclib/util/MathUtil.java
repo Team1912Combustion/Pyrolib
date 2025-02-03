@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package org.team1912.pyrogen.pyrolib.ftclib.interpolation;
+package org.team1912.pyrogen.pyrolib.ftclib.util;
 
 /** Math utility functions. */
 public final class MathUtil {

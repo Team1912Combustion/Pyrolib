@@ -18,6 +18,8 @@ public class PIDFController {
     private double setPoint;
     private double measuredValue;
     private double minIntegral, maxIntegral;
+    private double m_maximumInput;
+    private double m_minimumInput;
 
     private double errorVal_p;
     private double errorVal_v;
@@ -30,6 +32,9 @@ public class PIDFController {
 
     private double lastTimeStamp;
     private double period;
+
+    // Do the endpoints wrap around? e.g. Absolute encoder
+    private boolean m_continuous;
 
     /**
      * The base constructor for the PIDF controller
@@ -121,6 +126,35 @@ public class PIDFController {
     public boolean atSetPoint() {
         return Math.abs(errorVal_p) < errorTolerance_p
                 && Math.abs(errorVal_v) < errorTolerance_v;
+    }
+
+    /**
+     * Enables continuous input.
+     *
+     * <p>Rather then using the max and min input range as constraints, it considers them to be the
+     * same point and automatically calculates the shortest route to the setpoint.
+     *
+     * @param minimumInput The minimum value expected from the input.
+     * @param maximumInput The maximum value expected from the input.
+     */
+    public void enableContinuousInput(double minimumInput, double maximumInput) {
+        m_continuous = true;
+        m_minimumInput = minimumInput;
+        m_maximumInput = maximumInput;
+    }
+
+    /** Disables continuous input. */
+    public void disableContinuousInput() {
+        m_continuous = false;
+    }
+
+    /**
+     * Returns true if continuous input is enabled.
+     *
+     * @return True if continuous input is enabled.
+     */
+    public boolean isContinuousInputEnabled() {
+        return m_continuous;
     }
 
     /**

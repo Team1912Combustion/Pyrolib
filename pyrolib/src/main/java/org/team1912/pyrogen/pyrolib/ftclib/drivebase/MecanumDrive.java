@@ -2,6 +2,7 @@ package org.team1912.pyrogen.pyrolib.ftclib.drivebase;
 
 import org.team1912.pyrogen.pyrolib.ftclib.geometry.Vector2d;
 import org.team1912.pyrogen.pyrolib.ftclib.hardware.motors.Motor;
+import org.team1912.pyrogen.pyrolib.ftclib.kinematics.wpilibkinematics.MecanumDriveWheelSpeeds;
 
 /**
  * This is a classfile representing the kinematics of a mecanum drivetrain
@@ -205,6 +206,22 @@ public class MecanumDrive extends RobotDrive {
                 .set(backLeftSpeed * maxOutput);
         motors[MotorType.kBackRight.value]
                 .set(backRightSpeed * rightSideMultiplier * maxOutput);
+    }
+
+    /**
+     * Drives the motors directly with the specified drive wheel speeds.
+     *
+     * @param speeds    MecanumDriveWheelSpeeds
+     */
+    public void driveWithMecanumDriveWheelSpeeds(MecanumDriveWheelSpeeds speeds ) {
+        motors[MotorType.kFrontLeft.value]
+                .set(speeds.frontLeftMetersPerSecond * maxOutput);
+        motors[MotorType.kFrontRight.value]
+                .set(speeds.frontRightMetersPerSecond * rightSideMultiplier * maxOutput);
+        motors[MotorType.kBackLeft.value]
+                .set(speeds.rearLeftMetersPerSecond * maxOutput);
+        motors[MotorType.kBackRight.value]
+                .set(speeds.rearRightMetersPerSecond * rightSideMultiplier * maxOutput);
     }
 
 }

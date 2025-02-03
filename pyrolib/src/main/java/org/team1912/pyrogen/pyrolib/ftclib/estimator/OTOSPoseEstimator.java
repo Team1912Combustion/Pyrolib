@@ -6,7 +6,6 @@ import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.TreeMap;
 
-import org.team1912.pyrogen.pyrolib.ftclib.interpolation.MathUtil;
 import org.team1912.pyrogen.pyrolib.ftclib.kinematics.OTOSOdometry;
 import org.team1912.pyrogen.pyrolib.ftclib.geometry.Pose2d;
 import org.team1912.pyrogen.pyrolib.ftclib.geometry.Rotation2d;
@@ -14,6 +13,7 @@ import org.team1912.pyrogen.pyrolib.ftclib.geometry.Translation2d;
 import org.team1912.pyrogen.pyrolib.ftclib.geometry.Transform2d;
 import org.team1912.pyrogen.pyrolib.ftclib.geometry.Twist2d;
 import org.team1912.pyrogen.pyrolib.ftclib.interpolation.TimeInterpolatableBuffer;
+import org.team1912.pyrogen.pyrolib.ftclib.util.MathUtil;
 import org.team1912.pyrogen.pyrolib.jama.Matrix;
 
 // Open Source Software; you can modify and/or share it under the terms of

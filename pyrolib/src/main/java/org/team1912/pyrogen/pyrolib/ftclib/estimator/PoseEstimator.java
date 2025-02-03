@@ -8,10 +8,9 @@ import org.team1912.pyrogen.pyrolib.ftclib.geometry.Transform2d;
 import org.team1912.pyrogen.pyrolib.ftclib.geometry.Translation2d;
 import org.team1912.pyrogen.pyrolib.ftclib.geometry.Twist2d;
 import org.team1912.pyrogen.pyrolib.ftclib.interpolation.TimeInterpolatableBuffer;
-import org.team1912.pyrogen.pyrolib.ftclib.kinematics.OTOSOdometry;
+import org.team1912.pyrogen.pyrolib.ftclib.kinematics.Odometry;
 import org.team1912.pyrogen.pyrolib.ftclib.util.MathUtil;
 import org.team1912.pyrogen.pyrolib.jama.Matrix;
-import org.team1912.pyrogen.pyrolib.utils.Datalogger;
 
 import java.util.NavigableMap;
 import java.util.Optional;
@@ -19,8 +18,8 @@ import java.util.TreeMap;
 
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
-public class OTOSPoseEstimatorLog {
-  private final OTOSOdometry m_odometry;
+public class PoseEstimator {
+  private final Odometry m_odometry;
   private final Matrix m_q = new Matrix(3, 1);
   private final Matrix m_visionK = new Matrix(3, 3);
   private static final double kBufferDuration = 1.5;
@@ -36,7 +35,6 @@ public class OTOSPoseEstimatorLog {
 
   private Pose2d m_poseEstimate;
   private double start_time;
-  private Datalogger m_log;
 
   /**
    * Constructs a PoseEstimator.
@@ -49,14 +47,12 @@ public class OTOSPoseEstimatorLog {
    *     in meters, y position in meters, and heading in radians). Increase these numbers to trust
    *     the vision pose measurement less.
    */
-  public OTOSPoseEstimatorLog(
-      OTOSOdometry odometry,
+  public PoseEstimator(
+      Odometry odometry,
       Matrix stateStdDevs,
-      Matrix visionMeasurementStdDevs,
-      Datalogger logger) {
+      Matrix visionMeasurementStdDevs) {
 
     init_timer();
-    m_log = logger;
     m_odometry = odometry;
     m_poseEstimate = m_odometry.getPose();
     for (int i = 0; i < 3; ++i) {
@@ -236,10 +232,6 @@ public class OTOSPoseEstimatorLog {
    *     getFPGATimestamp() as your time source or sync the epochs.
    */
   public void addVisionMeasurement(Pose2d visionRobotPose, double timestampSeconds) {
-    m_log.addField("visionRobotPose");
-    m_log.addField(visionRobotPose.getX());
-    m_log.addField(visionRobotPose.getY());
-    m_log.newLine();
     // Step 0: If this measurement is old enough to be outside the pose buffer's timespan, skip.
     if (m_odometryPoseBuffer.getInternalBuffer().isEmpty()
         || m_odometryPoseBuffer.getInternalBuffer().lastKey() - kBufferDuration
@@ -257,11 +249,6 @@ public class OTOSPoseEstimatorLog {
       return;
     }
 
-    m_log.addField("odoSample");
-    m_log.addField(odometrySample.get().getX());
-    m_log.addField(odometrySample.get().getY());
-    m_log.newLine();
-
     // Step 3: Get the vision-compensated pose estimate at the moment the vision measurement was
     // made.
     Optional<Pose2d> visionSample = sampleAt(timestampSeconds);
@@ -271,18 +258,8 @@ public class OTOSPoseEstimatorLog {
       return;
     }
 
-    m_log.addField("visSample");
-    m_log.addField(visionSample.get().getX());
-    m_log.addField(visionSample.get().getY());
-    m_log.newLine();
-
     // Step 4: Measure the twist between the old pose estimate and the vision pose.
     Twist2d twist = visionSample.get().log(visionRobotPose);
-    m_log.addField("twist2d ");
-    m_log.addField(twist.dx);
-    m_log.addField(twist.dy);
-    m_log.addField(twist.dtheta);
-    m_log.newLine();
 
     // Step 5: We should not trust the twist entirely, so instead we scale this twist by a Kalman
     // gain matrix representing how much we trust vision measurements compared to our current pose.
@@ -292,21 +269,9 @@ public class OTOSPoseEstimatorLog {
     mat_twist.set(2, 0, twist.dtheta);
     Matrix k_times_twist = m_visionK.times(mat_twist);
 
-    m_log.addField("k_times_twist2d ");
-    m_log.addField(k_times_twist.get(0,0));
-    m_log.addField(k_times_twist.get(1,0));
-    m_log.addField(k_times_twist.get(2,0));
-    m_log.newLine();
-
     // Step 6: Convert back to Twist2d.
     Twist2d scaledTwist =
         new Twist2d(k_times_twist.get(0, 0), k_times_twist.get(1, 0), k_times_twist.get(2, 0));
-
-    m_log.addField("Scaled Twist2d ");
-    m_log.addField(scaledTwist.dx);
-    m_log.addField(scaledTwist.dy);
-    m_log.addField(scaledTwist.dtheta);
-    m_log.newLine();
 
     // Step 7: Calculate and record the vision update.
     VisionUpdate visionUpdate = new VisionUpdate(visionSample.get().exp(scaledTwist), odometrySample.get());
@@ -315,18 +280,9 @@ public class OTOSPoseEstimatorLog {
     // Step 8: Remove later vision measurements. (Matches previous behavior)
     m_visionUpdates.tailMap(timestampSeconds, false).entrySet().clear();
 
-    m_log.addField("Vision update");
-    m_log.addField(visionUpdate.visionPose.getX());
-    m_log.addField(visionUpdate.visionPose.getY());
-    m_log.newLine();
-
     // Step 9: Update latest pose estimate. Since we cleared all updates after this vision update,
     // it's guaranteed to be the latest vision update.
     m_poseEstimate = visionUpdate.compensate(m_odometry.getPose());
-    m_log.addField("New estimate");
-    m_log.addField(m_poseEstimate.getX());
-    m_log.addField(m_poseEstimate.getY());
-    m_log.newLine();
   }
 
   /**

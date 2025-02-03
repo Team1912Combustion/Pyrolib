@@ -9,6 +9,7 @@ package org.team1912.pyrogen.pyrolib.ftclib.controller.wpilibcontroller;
 
 import org.team1912.pyrogen.pyrolib.ftclib.controller.PIDController;
 import org.team1912.pyrogen.pyrolib.ftclib.trajectory.TrapezoidProfile;
+import org.team1912.pyrogen.pyrolib.ftclib.util.MathUtil;
 
 /**
  * Implements a PID control loop whose setpoint is constrained by a trapezoid
@@ -17,6 +18,10 @@ import org.team1912.pyrogen.pyrolib.ftclib.trajectory.TrapezoidProfile;
 @SuppressWarnings("PMD.TooManyMethods")
 public class ProfiledPIDController {
     private PIDController m_controller;
+
+    private double m_minimumInput;
+    private double m_maximumInput;
+
     private TrapezoidProfile.State m_goal = new TrapezoidProfile.State();
     private TrapezoidProfile.State m_setpoint = new TrapezoidProfile.State();
     private TrapezoidProfile.Constraints m_constraints;
@@ -178,6 +183,37 @@ public class ProfiledPIDController {
         return m_controller.atSetPoint();
     }
 
+
+    /**
+     * Enables continuous input.
+     *
+     * <p>Rather then using the max and min input range as constraints, it considers them to be the
+     * same point and automatically calculates the shortest route to the setpoint.
+     *
+     * @param minimumInput The minimum value expected from the input.
+     * @param maximumInput The maximum value expected from the input.
+     */
+    public void enableContinuousInput(double minimumInput, double maximumInput) {
+        m_controller.enableContinuousInput(minimumInput, maximumInput);
+        m_minimumInput = minimumInput;
+        m_maximumInput = maximumInput;
+    }
+
+    /** Disables continuous input. */
+    public void disableContinuousInput() {
+        m_controller.disableContinuousInput();
+    }
+
+    /**
+     * Sets the minimum and maximum contributions of the integral term.
+     *
+     * <p>The internal integrator is clamped so that the integral term's contribution to the output
+     * stays between minimumIntegral and maximumIntegral. This prevents integral windup.
+     *
+     * @param minimumIntegral The minimum contribution of the integral term.
+     * @param maximumIntegral The maximum contribution of the integral term.
+     */
+
     /**
      * Sets the error which is considered tolerable for use with atSetpoint().
      *
@@ -219,6 +255,22 @@ public class ProfiledPIDController {
      * @param measurement The current measurement of the process variable.
      */
     public double calculate(double measurement) {
+        if (m_controller.isContinuousInputEnabled()) {
+            // Get error which is the smallest distance between goal and measurement
+            double errorBound = (m_maximumInput - m_minimumInput) / 2.0;
+            double goalMinDistance =
+                    MathUtil.inputModulus(m_goal.position - measurement, -errorBound, errorBound);
+            double setpointMinDistance =
+                    MathUtil.inputModulus(m_setpoint.position - measurement, -errorBound, errorBound);
+
+            // Recompute the profile goal with the smallest error, thus giving the shortest path. The goal
+            // may be outside the input range after this operation, but that's OK because the controller
+            // will still go there and report an error of zero. In other words, the setpoint only needs to
+            // be offset from the measurement by the input range modulus; they don't need to be equal.
+            m_goal.position = goalMinDistance + measurement;
+            m_setpoint.position = setpointMinDistance + measurement;
+        }
+
         TrapezoidProfile profile = new TrapezoidProfile(m_constraints, m_goal, m_setpoint);
         m_setpoint = profile.calculate(getPeriod());
         return m_controller.calculate(measurement, m_setpoint.position);

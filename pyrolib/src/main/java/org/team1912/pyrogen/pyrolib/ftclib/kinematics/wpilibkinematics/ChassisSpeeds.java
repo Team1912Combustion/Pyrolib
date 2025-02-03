@@ -7,8 +7,8 @@
 
 package org.team1912.pyrogen.pyrolib.ftclib.kinematics.wpilibkinematics;
 
-
 import org.team1912.pyrogen.pyrolib.ftclib.geometry.Rotation2d;
+import org.team1912.pyrogen.pyrolib.ftclib.geometry.Translation2d;
 
 /**
  * Represents the speed of a robot chassis. Although this struct contains
@@ -81,6 +81,21 @@ public class ChassisSpeeds {
                 -vxMetersPerSecond * robotAngle.getSin() + vyMetersPerSecond * robotAngle.getCos(),
                 omegaRadiansPerSecond
         );
+    }
+
+    /**
+     * Converts this field-relative set of speeds into a robot-relative ChassisSpeeds object.
+     *
+     * @param robotAngle The angle of the robot as measured by a gyroscope. The robot's angle is
+     *     considered to be zero when it is facing directly away from your alliance station wall.
+     *     Remember that this should be CCW positive.
+     */
+    public void toRobotRelativeSpeeds(Rotation2d robotAngle) {
+        // CW rotation into chassis frame
+        Translation2d rotated =
+                new Translation2d(vxMetersPerSecond, vyMetersPerSecond).rotateBy(robotAngle.unaryMinus());
+        vxMetersPerSecond = rotated.getX();
+        vyMetersPerSecond = rotated.getY();
     }
 
     @Override

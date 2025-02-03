@@ -4,7 +4,8 @@
 
 package org.team1912.pyrogen.pyrolib.ftclib.interpolation;
 
-//import edu.wpi.first.math.MathUtil;
+import org.team1912.pyrogen.pyrolib.ftclib.util.MathUtil;
+
 import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.TreeMap;

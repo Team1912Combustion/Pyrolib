@@ -18,6 +18,8 @@ public class Rotation2d {
     private final double m_cos;
     private final double m_sin;
 
+    public static final Rotation2d kZero = new Rotation2d();
+
     /**
      * Constructs a Rotation2d with a default angle of 0 degrees.
      */

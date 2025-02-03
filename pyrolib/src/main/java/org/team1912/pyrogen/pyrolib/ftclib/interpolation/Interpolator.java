@@ -4,6 +4,8 @@
 
 package org.team1912.pyrogen.pyrolib.ftclib.interpolation;
 
+import org.team1912.pyrogen.pyrolib.ftclib.util.MathUtil;
+
 /**
  * An interpolation function that returns a value interpolated between an upper and lower bound.
  * This behavior can be linear or nonlinear.

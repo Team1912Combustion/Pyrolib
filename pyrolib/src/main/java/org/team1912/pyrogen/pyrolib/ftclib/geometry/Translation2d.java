@@ -4,6 +4,8 @@ public class Translation2d {
     private final double m_x;
     private final double m_y;
 
+    public static final Translation2d kZero = new Translation2d();
+
     /**
      * Constructs a Translation2d with X and Y components equal to zero.
      */

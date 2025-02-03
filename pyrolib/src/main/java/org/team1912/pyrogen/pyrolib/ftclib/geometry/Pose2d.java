@@ -11,13 +11,15 @@ public class Pose2d implements Interpolatable<Pose2d> {
     private final Translation2d m_translation;
     private final Rotation2d m_rotation;
 
+    public static final Pose2d kZero = new Pose2d();
+
     /**
      * Constructs a pose at the origin facing toward the positive X axis.
      * (Translation2d{0, 0} and Rotation{0})
      */
     public Pose2d() {
-        m_translation = new Translation2d();
-        m_rotation = new Rotation2d();
+        m_translation = Translation2d.kZero;
+        m_rotation = Rotation2d.kZero;
     }
 
     /**

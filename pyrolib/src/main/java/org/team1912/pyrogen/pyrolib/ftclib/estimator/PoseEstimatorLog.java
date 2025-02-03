@@ -8,7 +8,7 @@ import org.team1912.pyrogen.pyrolib.ftclib.geometry.Transform2d;
 import org.team1912.pyrogen.pyrolib.ftclib.geometry.Translation2d;
 import org.team1912.pyrogen.pyrolib.ftclib.geometry.Twist2d;
 import org.team1912.pyrogen.pyrolib.ftclib.interpolation.TimeInterpolatableBuffer;
-import org.team1912.pyrogen.pyrolib.ftclib.kinematics.OTOSOdometry;
+import org.team1912.pyrogen.pyrolib.ftclib.kinematics.Odometry;
 import org.team1912.pyrogen.pyrolib.ftclib.util.MathUtil;
 import org.team1912.pyrogen.pyrolib.jama.Matrix;
 import org.team1912.pyrogen.pyrolib.utils.Datalogger;
@@ -19,8 +19,8 @@ import java.util.TreeMap;
 
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
-public class OTOSPoseEstimatorLog {
-  private final OTOSOdometry m_odometry;
+public class PoseEstimatorLog {
+  private final Odometry m_odometry;
   private final Matrix m_q = new Matrix(3, 1);
   private final Matrix m_visionK = new Matrix(3, 3);
   private static final double kBufferDuration = 1.5;
@@ -49,8 +49,8 @@ public class OTOSPoseEstimatorLog {
    *     in meters, y position in meters, and heading in radians). Increase these numbers to trust
    *     the vision pose measurement less.
    */
-  public OTOSPoseEstimatorLog(
-      OTOSOdometry odometry,
+  public PoseEstimatorLog(
+      Odometry odometry,
       Matrix stateStdDevs,
       Matrix visionMeasurementStdDevs,
       Datalogger logger) {
